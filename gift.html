@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ja" style="color-scheme: light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>GIFT Terminal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      color-scheme: light;
+      --cream: #F6F8F4;
+      --brown: #2C3428;
+      --brown-mid: #5A6654;
+      --brown-light: #96A890;
+      --brown-pale: #D4DED0;
+      --accent: #6A8C64;
+      --accent-dark: #4E6E48;
+      --accent-light: #E2EDE0;
+      --sage: #7A9C74;
+      --card: #F9FBF8;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --cream: #F6F8F4;
+        --brown: #2C3428;
+        --brown-mid: #5A6654;
+        --brown-light: #96A890;
+        --brown-pale: #D4DED0;
+        --accent: #6A8C64;
+        --accent-dark: #4E6E48;
+        --accent-light: #E2EDE0;
+        --sage: #7A9C74;
+        --card: #F9FBF8;
+      }
+    }
+
+    body {
+      background: var(--cream);
+      background-color: #F6F8F4 !important;
+      color: var(--brown);
+      color: #2C3428 !important;
+      font-family: 'Noto Serif JP', Georgia, serif;
+      min-height: 100vh;
+    }
+
+    .screen { display: none; min-height: 100vh; align-items: center; justify-content: center; padding: 48px 24px; flex-direction: column; }
+    .screen.active { display: flex; }
+
+    .container { max-width: 460px; width: 100%; }
+    .container-wide { max-width: 580px; width: 100%; margin: 0 auto; padding: 64px 24px; }
+
+    .eyebrow { font-family: 'Cormorant Garamond', serif; font-size: 10px; letter-spacing: 5px; color: var(--sage); text-transform: uppercase; margin-bottom: 20px; }
+
+    .logo { font-family: 'Cormorant Garamond', serif; font-size: 52px; font-weight: 300; color: var(--brown); letter-spacing: 2px; line-height: 1; margin-bottom: 4px; text-align: center; }
+    .logo-sub { font-family: 'Cormorant Garamond', serif; font-size: 13px; letter-spacing: 10px; color: var(--sage); margin-bottom: 44px; text-align: center; }
+    .divider { width: 1px; height: 56px; background: linear-gradient(to bottom, transparent, var(--brown-pale), transparent); margin: 0 auto 44px; }
+
+    .body-text { color: var(--brown-mid); font-size: 14px; line-height: 2.4; margin-bottom: 44px; font-weight: 300; text-align: center; }
+    .italic { font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--sage); font-size: 13px; }
+
+    .btn { background: var(--accent); border: none; color: #F6F8F4; padding: 15px 48px; font-size: 11px; letter-spacing: 4px; cursor: pointer; font-family: 'Noto Serif JP', serif; transition: background 0.3s; width: 100%; border-radius: 4px; }
+    .btn:hover { background: var(--accent-dark); }
+    .btn:disabled { background: var(--brown-pale); color: var(--brown-light); cursor: default; }
+    .btn-sm { width: auto; padding: 14px 36px; }
+    .btn-outline { background: transparent; border: 1px solid var(--brown-pale); color: var(--accent); padding: 13px 40px; font-size: 11px; letter-spacing: 3px; cursor: pointer; font-family: 'Noto Serif JP', serif; transition: all 0.3s; border-radius: 4px; }
+    .btn-outline:hover { border-color: var(--accent); color: var(--brown); }
+
+    .field { margin-bottom: 32px; }
+    .label { font-size: 10px; letter-spacing: 3px; color: var(--brown-light); display: block; margin-bottom: 12px; text-transform: uppercase; }
+    .input { background: transparent; border: none; border-bottom: 1px solid var(--brown-pale); color: var(--brown); padding: 10px 0; font-size: 15px; outline: none; font-family: 'Noto Serif JP', serif; transition: border-color 0.3s; width: 100%; }
+    .input:focus { border-bottom-color: var(--accent); }
+    .input::placeholder { color: var(--brown-pale); }
+    .textarea { background: transparent; border: none; border-bottom: 1px solid var(--brown-pale); color: var(--brown); padding: 12px 0; font-size: 15px; outline: none; resize: none; font-family: 'Noto Serif JP', serif; line-height: 2; width: 100%; transition: border-color 0.3s; }
+    .textarea:focus { border-bottom-color: var(--accent); }
+    .textarea::placeholder { color: var(--brown-pale); }
+    .hint { color: var(--brown-light); font-size: 12px; margin-top: 8px; font-style: italic; font-family: 'Cormorant Garamond', serif; }
+
+    /* scene chips */
+    .scene-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .scene-chip { font-family: 'Cormorant Garamond', serif; font-size: 12px; letter-spacing: 1px; color: var(--brown-mid); border: 1px solid var(--brown-pale); padding: 6px 14px; cursor: pointer; transition: all 0.2s; background: transparent; font-style: italic; border-radius: 20px; }
+    .scene-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+    .scene-chip.active { background: var(--accent); color: #F6F8F4; border-color: var(--accent); }
+
+    .progress { display: flex; gap: 6px; margin-bottom: 52px; }
+    .progress-bar { flex: 1; height: 1px; transition: background 0.4s; }
+
+    .question { font-size: 19px; line-height: 1.9; color: var(--brown); margin-bottom: 10px; font-weight: 400; }
+    .question-hint { font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--brown-light); font-size: 14px; margin-bottom: 32px; line-height: 1.8; }
+
+    .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 36px; }
+    .back-btn { background: transparent; border: none; color: var(--brown-light); font-size: 12px; cursor: pointer; letter-spacing: 2px; font-family: 'Noto Serif JP', serif; transition: color 0.3s; padding: 8px 0; }
+    .back-btn:hover { color: var(--accent); }
+
+    .spinner { width: 36px; height: 36px; border: 1px solid var(--accent-light); border-top: 1px solid var(--sage); border-radius: 50%; animation: spin 1.4s linear infinite; margin: 0 auto 36px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--sage); font-size: 15px; letter-spacing: 2px; text-align: center; }
+
+    /* result */
+    .result-header { text-align: center; margin-bottom: 48px; }
+    .to-from { display: flex; justify-content: center; gap: 8px; align-items: center; font-family: 'Cormorant Garamond', serif; font-size: 14px; color: var(--brown-light); font-style: italic; margin-bottom: 8px; }
+    .profile-card { background: var(--card); border-left: 2px solid var(--accent-light); padding: 22px 26px; margin-bottom: 48px; }
+    .profile-text { color: #3C4A38; font-size: 14px; line-height: 2.3; font-weight: 300; }
+
+    .gift-item { display: flex; gap: 18px; padding: 28px 0; border-bottom: 1px solid var(--accent-light); align-items: flex-start; }
+    .gift-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+    .gift-category { font-size: 9px; letter-spacing: 3px; margin-bottom: 6px; text-transform: uppercase; font-family: 'Cormorant Garamond', serif; }
+    .gift-name { font-size: 17px; color: var(--brown); margin-bottom: 4px; line-height: 1.5; font-weight: 400; }
+    .gift-detail { color: var(--brown-light); font-size: 12px; margin-bottom: 10px; }
+    .gift-reason { font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--brown-mid); font-size: 14px; line-height: 1.9; }
+
+    .footer { text-align: center; margin-top: 56px; padding-top: 44px; border-top: 1px solid var(--accent-light); }
+    .footer-text { font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--brown-light); font-size: 13px; margin-bottom: 28px; letter-spacing: 1px; }
+
+    .row { display: flex; gap: 12px; align-items: flex-end; }
+    .error-text { color: #B85A4A; font-size: 12px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="screen-intro" class="screen active">
+  <div class="container" style="text-align:center">
+    <div class="eyebrow">Personal Gift Curation</div>
+    <div class="logo">GIFT</div>
+    <div class="logo-sub">Terminal</div>
+    <div class="divider"></div>
+    <p class="body-text">
+      贈る相手のことを語るだけで、<br>
+      その人にしか届かない贈り物が見つかります。<br>
+      <span class="italic">贈ることは、愛を形にすることだ。</span>
+    </p>
+    <button class="btn" onclick="showScreen('screen-pre')">ギフトを探しはじめる</button>
+  </div>
+</div>
+
+<!-- PRE -->
+<div id="screen-pre" class="screen">
+  <div class="container">
+    <div class="eyebrow">About the gift</div>
+    <h2 style="font-size:20px;font-weight:400;margin-bottom:8px">贈り物について教えてください。</h2>
+    <p class="italic" style="display:block;margin-bottom:44px;line-height:2">まず基本的なことを。</p>
+
+    <div class="field">
+      <label class="label">あなたのお名前</label>
+      <input class="input" type="text" id="senderName" placeholder="例：堅太郎">
+    </div>
+
+    <div class="field">
+      <label class="label">贈る相手のお名前</label>
+      <input class="input" type="text" id="receiverName" placeholder="例：田中さん、お母さん…">
+    </div>
+
+    <div class="field">
+      <label class="label">おふたりの関係</label>
+      <input class="input" type="text" id="relation" placeholder="例：親友、上司、母、パートナー…">
+    </div>
+
+    <div class="field" style="margin-bottom:44px">
+      <label class="label">贈るシーン</label>
+      <input class="input" type="text" id="sceneInput" placeholder="例：40歳の誕生日、退職祝い…">
+      <div class="scene-wrap" id="scene-chips">
+        <button class="scene-chip" onclick="setScene('誕生日')">誕生日</button>
+        <button class="scene-chip" onclick="setScene('結婚・出産祝い')">結婚・出産祝い</button>
+        <button class="scene-chip" onclick="setScene('退職・転職祝い')">退職・転職祝い</button>
+        <button class="scene-chip" onclick="setScene('クリスマス')">クリスマス</button>
+        <button class="scene-chip" onclick="setScene('感謝を伝えたい')">感謝を伝えたい</button>
+        <button class="scene-chip" onclick="setScene('特別な理由はないけど')">特別な理由はないけど</button>
+      </div>
+    </div>
+
+    <button class="btn" id="btn-pre" onclick="startQuestions()" disabled>次へ進む</button>
+  </div>
+</div>
+
+<!-- QUESTIONS -->
+<div id="screen-questions" class="screen">
+  <div class="container">
+    <div class="progress" id="progress"></div>
+    <div class="eyebrow" id="q-label"></div>
+    <h2 class="question" id="q-text"></h2>
+    <p class="question-hint" id="q-hint"></p>
+    <textarea class="textarea" id="q-answer" rows="5" oninput="onAnswerInput()"></textarea>
+    <div style="margin-top:10px;min-height:20px;display:flex;justify-content:space-between;align-items:center">
+      <span id="depth-msg" style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:12px;color:var(--brown-light);transition:color 0.4s"></span>
+      <span id="char-count" style="font-family:'Cormorant Garamond',serif;font-size:11px;color:var(--brown-pale);letter-spacing:1px"></span>
+    </div>
+    <p class="error-text" id="q-error" style="display:none"></p>
+    <div class="nav">
+      <button class="back-btn" onclick="prevQuestion()">← 戻る</button>
+      <button class="btn btn-sm" id="btn-next" onclick="nextQuestion()" disabled>次へ →</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="screen-loading" class="screen">
+  <div>
+    <div class="spinner"></div>
+    <p class="loading-text" id="loading-text">相手のことを読んでいます…</p>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div id="screen-result" class="screen" style="align-items:flex-start">
+  <div class="container-wide">
+    <div class="result-header">
+      <div class="eyebrow">Your Gift Selection</div>
+      <div class="to-from">
+        <span id="result-sender"></span>
+        <span style="color:var(--brown-pale)">→</span>
+        <span id="result-receiver"></span>
+        <span style="color:var(--brown-pale)">への</span>
+      </div>
+      <h2 style="font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:300">5つの贈り物</h2>
+    </div>
+    <div class="profile-card"><p class="profile-text" id="result-profile"></p></div>
+    <div id="result-gifts"></div>
+    <div class="footer">
+      <p class="footer-text">贈ることは、その人のことを深く知ることだ。</p>
+      <button class="btn-outline" onclick="reset()">もう一度探す</button>
+      <p style="margin-top:28px;font-family:'Cormorant Garamond',serif;font-size:11px;color:var(--brown-pale);letter-spacing:0.5px;line-height:1.8">
+        GIFT TerminalはAmazonアソシエイトとして、<br>適格販売により収入を得ています。
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Pre screen ─────────────────────────────────────────
+  let preData = { sender: '', receiver: '', relation: '', scene: '' };
+
+  function setScene(val) {
+    document.getElementById('sceneInput').value = val;
+    document.querySelectorAll('.scene-chip').forEach(c => c.classList.remove('active'));
+    event.target.classList.add('active');
+    validatePre();
+  }
+
+  document.getElementById('sceneInput').addEventListener('input', function() {
+    document.querySelectorAll('.scene-chip').forEach(c => c.classList.remove('active'));
+    validatePre();
+  });
+  ['senderName','receiverName','relation'].forEach(id => {
+    document.getElementById(id).addEventListener('input', validatePre);
+  });
+
+  function validatePre() {
+    const ok = document.getElementById('senderName').value.trim()
+             && document.getElementById('receiverName').value.trim()
+             && document.getElementById('relation').value.trim()
+             && document.getElementById('sceneInput').value.trim();
+    document.getElementById('btn-pre').disabled = !ok;
+  }
+
+  // ── Questions ───────────────────────────────────────────
+  const QUESTIONS = [
+    {
+      id: 'q1', label: 'Q1　人柄', num: 1,
+      question: () => `${preData.receiver}さんはどんな人ですか？`,
+      hint: '好きなもの、口癖、最近の様子、どんな時間を大切にしているか…なんでも。',
+      placeholder: '例：読書が好きで、週末は山に登っている。いつも人の話をよく聞いてくれる…'
+    },
+    {
+      id: 'q2', label: 'Q2　今の状況', num: 2,
+      question: () => `今、${preData.receiver}さんはどんな時期にいますか？`,
+      hint: '転換期、充実期、少し疲れている、新しい何かが始まった…どんなことでも。',
+      placeholder: '例：子どもが生まれたばかりで忙しそう。仕事で大きなプロジェクトを抱えている…'
+    },
+    {
+      id: 'q3', label: 'Q3　届けたい気持ち', num: 3,
+      question: () => `${preData.receiver}さんに、この贈り物で何を届けたいですか？`,
+      hint: 'ねぎらい、励まし、一緒に笑いたい、ただ「好き」を伝えたい…言葉にしにくくても大丈夫。',
+      placeholder: '例：いつも頑張っているから少し休んでほしい。新しいステージを応援したい…'
+    }
+  ];
+
+  const GIFT_ICONS = ['📚','🎁','✨','🌿','💫'];
+  const GIFT_COLORS = ['#8B6F4E','#C4956A','#6A7FA8','#5A8A6A','#9E7A5A'];
+
+  let currentQ = 0;
+  const answers = { q1: '', q2: '', q3: '' };
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function startQuestions() {
+    preData.sender   = document.getElementById('senderName').value.trim();
+    preData.receiver = document.getElementById('receiverName').value.trim();
+    preData.relation = document.getElementById('relation').value.trim();
+    preData.scene    = document.getElementById('sceneInput').value.trim();
+    currentQ = 0;
+    renderQuestion();
+    showScreen('screen-questions');
+  }
+
+  function renderQuestion() {
+    const q = QUESTIONS[currentQ];
+    const prog = document.getElementById('progress');
+    prog.innerHTML = QUESTIONS.map((_, i) =>
+      `<div class="progress-bar" style="background:${i <= currentQ ? '#6A8C64' : '#D4DED0'}"></div>`
+    ).join('');
+    document.getElementById('q-label').textContent = `${q.label}　${q.num} / ${QUESTIONS.length}`;
+    document.getElementById('q-text').textContent = typeof q.question === 'function' ? q.question() : q.question;
+    document.getElementById('q-hint').textContent = q.hint;
+    document.getElementById('q-error').style.display = 'none';
+    const ta = document.getElementById('q-answer');
+    ta.value = answers[q.id];
+    ta.placeholder = q.placeholder;
+    document.getElementById('depth-msg').textContent = '';
+    document.getElementById('char-count').textContent = '';
+    if (answers[q.id]) onAnswerInput();
+    const isLast = currentQ === QUESTIONS.length - 1;
+    const btn = document.getElementById('btn-next');
+    btn.textContent = isLast ? 'ギフトを探す' : '次へ →';
+    btn.disabled = !answers[q.id].trim();
+  }
+
+  function onAnswerInput() {
+    const q = QUESTIONS[currentQ];
+    const val = document.getElementById('q-answer').value;
+    answers[q.id] = val;
+    document.getElementById('btn-next').disabled = !val.trim();
+    const len = val.trim().length;
+    const msg = document.getElementById('depth-msg');
+    const cnt = document.getElementById('char-count');
+    cnt.textContent = len > 0 ? `${len}字` : '';
+    if (len === 0) { msg.textContent = ''; }
+    else if (len < 15) { msg.textContent = 'もう少し教えてもらえると、より的確なギフトが見つかります。'; msg.style.color = 'var(--brown-light)'; }
+    else if (len < 50) { msg.textContent = 'その人の輪郭が、少しずつ見えてきました。'; msg.style.color = 'var(--accent)'; }
+    else if (len < 120) { msg.textContent = 'その人への理解が、ギフトの精度を上げます。'; msg.style.color = 'var(--brown-mid)'; }
+    else { msg.textContent = 'よく伝わりました。この言葉からギフトを選びます。'; msg.style.color = 'var(--brown)'; }
+  }
+
+  function prevQuestion() {
+    if (currentQ > 0) { currentQ--; renderQuestion(); }
+    else { showScreen('screen-pre'); }
+  }
+
+  function nextQuestion() {
+    if (currentQ < QUESTIONS.length - 1) { currentQ++; renderQuestion(); }
+    else { fetchGifts(); }
+  }
+
+  // ── API ─────────────────────────────────────────────────
+  function buildPrompt() {
+    return `あなたはGIFT Terminalというパーソナルギフト提案サービスのAIです。以下の情報をもとに、受け取る人にとって最高の贈り物を5つ提案してください。
+
+【贈り主】${preData.sender}
+【贈る相手】${preData.receiver}（${preData.relation}）
+【シーン】${preData.scene}
+
+【ヒアリング回答】
+Q1（相手の人柄・好きなもの）：${answers.q1}
+Q2（相手の今の状況・時期）：${answers.q2}
+Q3（届けたい気持ち）：${answers.q3}
+
+【提案のルール】
+- 回答の内容だけでなく「答え方」（語彙・感情・具体性）も読む
+- 5つのギフトは異なるカテゴリから選ぶ（本・体験・雑貨・食・その他）
+- 各ギフトには具体的な商品名・ブランド名を入れる
+- Amazonで検索できる商品を優先する
+- 相手の今の状況と届けたい気持ちの両方に応えるものを選ぶ
+
+以下のJSON形式のみで返してください。前置きや説明は不要です。
+
+{
+  "profile": "${preData.receiver}さんへの2〜3文のプロファイル（核心を突く、温かく鋭い言葉で）",
+  "gifts": [
+    { "category": "カテゴリ名", "name": "具体的な商品・ギフト名", "detail": "ブランド名や補足情報", "reason": "なぜこの人にこれを届けるか（40字程度）" },
+    { "category": "カテゴリ名", "name": "具体的な商品・ギフト名", "detail": "ブランド名や補足情報", "reason": "なぜこの人にこれを届けるか（40字程度）" },
+    { "category": "カテゴリ名", "name": "具体的な商品・ギフト名", "detail": "ブランド名や補足情報", "reason": "なぜこの人にこれを届けるか（40字程度）" },
+    { "category": "カテゴリ名", "name": "具体的な商品・ギフト名", "detail": "ブランド名や補足情報", "reason": "なぜこの人にこれを届けるか（40字程度）" },
+    { "category": "カテゴリ名", "name": "具体的な商品・ギフト名", "detail": "ブランド名や補足情報", "reason": "なぜこの人にこれを届けるか（40字程度）" }
+  ]
+}`;
+  }
+
+  const LOADING_TEXTS = [
+    '相手のことを読んでいます…',
+    '人柄を辿っています…',
+    '今の状況を読み取っています…',
+    '届けたい気持ちに耳を傾けています…',
+    '5つの贈り物を探しています…',
+    '見つかりました。'
+  ];
+
+  async function fetchGifts() {
+    showScreen('screen-loading');
+    let i = 0;
+    document.getElementById('loading-text').textContent = LOADING_TEXTS[0];
+    const interval = setInterval(() => { i++; if (i < LOADING_TEXTS.length) document.getElementById('loading-text').textContent = LOADING_TEXTS[i]; }, 2000);
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: [{ role: 'user', content: buildPrompt() }] })
+      });
+      const data = await res.json();
+      clearInterval(interval);
+      if (data.error) throw new Error('APIエラー: ' + JSON.stringify(data.error));
+      if (!data.content) throw new Error('contentなし');
+      const text = data.content.map(b => b.text || '').join('');
+      const cleaned = text.replace(/```json|```/g, '').trim();
+      let parsed;
+      try { parsed = JSON.parse(cleaned); } catch (e) { throw new Error('JSONパース失敗: ' + cleaned.substring(0, 200)); }
+      renderResult(parsed);
+      showScreen('screen-result');
+    } catch (e) {
+      clearInterval(interval);
+      showScreen('screen-questions');
+      document.getElementById('q-error').textContent = 'エラー: ' + e.message;
+      document.getElementById('q-error').style.display = 'block';
+    }
+  }
+
+  function amazonUrl(name, detail) {
+    return `https://www.amazon.co.jp/s?k=${encodeURIComponent(name + ' ' + detail)}&tag=kentaro087-22`;
+  }
+
+  function renderResult(result) {
+    document.getElementById('result-sender').textContent = preData.sender;
+    document.getElementById('result-receiver').textContent = preData.receiver;
+    document.getElementById('result-profile').textContent = result.profile;
+
+    const el = document.getElementById('result-gifts');
+    el.innerHTML = result.gifts.map((gift, i) => `
+      <div class="gift-item">
+        <div class="gift-icon">${GIFT_ICONS[i]}</div>
+        <div style="flex:1">
+          <div class="gift-category" style="color:${GIFT_COLORS[i]}">${gift.category}</div>
+          <div class="gift-name">${gift.name}</div>
+          <div class="gift-detail">${gift.detail}</div>
+          <div class="gift-reason">${gift.reason}</div>
+          <a href="${amazonUrl(gift.name, gift.detail)}" target="_blank" rel="noopener"
+             style="display:inline-block;margin-top:10px;font-family:'Cormorant Garamond',serif;font-size:12px;letter-spacing:2px;color:var(--accent);text-decoration:none;border-bottom:1px solid var(--brown-pale);padding-bottom:1px;transition:color 0.2s,border-color 0.2s"
+             onmouseover="this.style.color='var(--brown)';this.style.borderColor='var(--accent)'"
+             onmouseout="this.style.color='var(--accent)';this.style.borderColor='var(--brown-pale)'">
+            Amazonで探す →
+          </a>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function reset() {
+    answers.q1 = ''; answers.q2 = ''; answers.q3 = '';
+    preData = { sender: '', receiver: '', relation: '', scene: '' };
+    ['senderName','receiverName','relation','sceneInput'].forEach(id => document.getElementById(id).value = '');
+    document.querySelectorAll('.scene-chip').forEach(c => c.classList.remove('active'));
+    document.getElementById('btn-pre').disabled = true;
+    currentQ = 0;
+    showScreen('screen-intro');
+  }
+</script>
+</body>
+</html>
